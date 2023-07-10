@@ -56,8 +56,6 @@ Somebody once told me the world is gonna roll me
 
 * ![Fabric][fabric]
 * ![Fabric-Language-Kotlin][fabric-language-kotlin]
-* ![ModMenu Badges Lib][modmenu-badges-lib]
-* ![Ducky-Updater-Lib][ducky-updater-lib]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
