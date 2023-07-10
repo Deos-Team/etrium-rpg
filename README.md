@@ -48,8 +48,6 @@
 
 ![In-Game ScreenShot][screenshot]
 
-Somebody once told me the world is gonna roll me
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Built With
