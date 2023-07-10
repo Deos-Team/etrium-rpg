@@ -81,7 +81,7 @@ tasks {
                 )
             )
         }
-        filesMatching("template.mixins.json") {
+        filesMatching("$modId.mixins.json") {
             expand(mutableMapOf("modId" to modId))
         }
     }
