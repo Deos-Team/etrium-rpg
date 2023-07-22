@@ -1,24 +1,25 @@
 {
   "schemaVersion": 1,
-  "id": "${modId}",
-  "version": "${modVersion}",
-  "name": "${modName}",
-  "description": "${modDescription}",
+  "id": "etrium",
+  "version": "1.0.0",
+  "name": "Etrium RPG",
+  "description": "Test",
   "authors": [
-    "Syorito Hatsuki"
+    "DenthLs",
+    "Vazkii"
   ],
   "contact": {
     "issues": "https://github.com/deos-team/entrium-rpg/issues",
     "sources": "https://github.com/deos-team/entrium-rpg"
   },
   "license": "MIT Licence",
-  "icon": "assets/${modId}/icon.png",
+  "icon": "assets/etrium/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
       {
         "adapter": "kotlin",
-        "value": "dev.deos.${modId}.Etrium"
+        "value": "dev.deos.etrium.Etrium"
       }
     ]
   },
@@ -39,14 +40,14 @@
     ]
   },
   "mixins": [
-    "${modId}.mixins.json"
+    "etrium.mixins.json"
   ],
   "depends": {
-    "fabric": "*",
-    "fabricloader": ">=${loaderVersion}",
-    "fabric-language-kotlin": ">=${fabricKotlinVersion}",
-    "minecraft": ">=${minecraftVersion}",
-    "java": ">=${javaVersion}"
+    "fabric": ">=0.83.1+1.20.1",
+    "fabricloader": ">=0.14.21",
+    "fabric-language-kotlin": ">=1.9.5+kotlin.1.8.22",
+    "minecraft": ">=1.20.1",
+    "java": ">=17"
   },
   "recommends": {
     "modmenu-badges-lib": "*"

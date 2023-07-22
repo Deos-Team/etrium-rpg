@@ -42,4 +42,5 @@ public class PlayerEntityMixin implements EnergyContainer {
     private void onReadEntityFromNBT(NbtCompound compound, CallbackInfo ci) {
         setEnergy(compound.getFloat("energy"));
     }
+
 }
