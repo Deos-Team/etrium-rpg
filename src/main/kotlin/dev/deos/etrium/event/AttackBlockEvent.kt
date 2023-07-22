@@ -21,7 +21,7 @@ class AttackBlockEvent: AttackBlockCallback {
     ): ActionResult {
         if (!world!!.isClient() && !player!!.isSpectator) {
             val playerEssence: EnergyContainer = player as EnergyContainer
-            return if (playerEssence.getEnergy() !== 0F) {
+            return if (playerEssence.getEnergy() != 0F) {
                 playerEssence.setEnergy(playerEssence.getEnergy() - 1.0f)
                 player.sendMessage(Text.literal("${playerEssence.getEnergy()} energy"))
                 ActionResult.PASS

@@ -20,7 +20,7 @@ class AttackEntityEvent: AttackEntityCallback {
         hitResult: EntityHitResult?
     ): ActionResult {
         val playerEssence: EnergyContainer = player as EnergyContainer
-        if (!world!!.isClient() && !player.isSpectator) {
+        if (!world!!.isClient() && !player.isSpectator && player.getEnergy() != player.getMaxEnergy()) {
             playerEssence.setEnergy(playerEssence.getEnergy() + 1.0f)
             player.sendMessage(Text.literal("${playerEssence.getEnergy()} energy got"))
         }
