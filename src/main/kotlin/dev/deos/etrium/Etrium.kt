@@ -4,7 +4,8 @@ import com.mojang.logging.LogUtils
 import dev.deos.etrium.event.AttackBlockEvent
 import dev.deos.etrium.event.AttackEntityEvent
 import dev.deos.etrium.event.PlayerTickEvent
-import dev.deos.etrium.utils.EnergyContainer
+import dev.deos.etrium.utils.EnergyData
+import dev.deos.etrium.utils.IEntityDataSaver
 import dev.deos.etrium.utils.PlayerTickContainer
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
@@ -20,14 +21,14 @@ object Etrium : ModInitializer {
 
 
         PlayerTickEvent.TICK.register {
-            val player = it as EnergyContainer
+            val nbt = it as IEntityDataSaver
             val testPlayer = it as PlayerTickContainer
             if (testPlayer.getTicks() % 20 == 0) {
-                if (player.getEnergy() >= player.getMaxEnergy()) {
-                    it.sendMessage(Text.literal("Max Energy: ${player.getMaxEnergy()}"))
-                    it.sendMessage(Text.literal(player.getRegenEnergy().toString()))
-                    player.setEnergy(player.getEnergy() + player.getRegenEnergy())
-                    it.sendMessage(Text.literal("Energy ${player.getEnergy()}/${player.getMaxEnergy()}"), true)
+                if (EnergyData.getEnergy(nbt) >= EnergyData.getMaxEnergy(nbt)) {
+                    it.sendMessage(Text.literal("Max Energy: ${EnergyData.getMaxEnergy(nbt)}"))
+                    it.sendMessage(Text.literal(EnergyData.getRegen(nbt).toString()))
+                    EnergyData.addEnergy(nbt, EnergyData.getRegen(nbt))
+                    it.sendMessage(Text.literal("Energy ${EnergyData.getEnergy(nbt)}/${EnergyData.getMaxEnergy(nbt)}"), true)
                 }
             }
         }

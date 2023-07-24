@@ -1,6 +1,7 @@
 package dev.deos.etrium.event
 
-import dev.deos.etrium.utils.EnergyContainer
+import dev.deos.etrium.utils.EnergyData
+import dev.deos.etrium.utils.IEntityDataSaver
 import dev.deos.etrium.utils.EnergyRequired
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback
 import net.minecraft.entity.Entity
@@ -21,16 +22,16 @@ class AttackEntityEvent: AttackEntityCallback {
         hitResult: EntityHitResult?
     ): ActionResult {
         if (!world.isClient() && !player.isSpectator) {
-            val playerEssence: EnergyContainer = player as EnergyContainer
-            return if (playerEssence.getEnergy() != 0F) {
-                playerEssence.setEnergy(playerEssence.getEnergy() - EnergyRequired.attackEntity.value)
-                player.sendMessage(Text.literal("${playerEssence.getEnergy()} energy"), true)
+            val nbt = player as IEntityDataSaver
+            return if (EnergyData.getEnergy(nbt) >= EnergyRequired.attackEntity.value) {
+                EnergyData.removeEnergy(nbt, EnergyRequired.attackEntity.value)
+                player.sendMessage(Text.literal("${EnergyData.getEnergy(nbt)} energy"), true)
                 ActionResult.PASS
             } else {
                 player.sendMessage(
                     Text.literal(
                         "Don't enough energy. " +
-                                "Required's ${EnergyRequired.attackEntity.value}. You have ${player.getEnergy()} "
+                                "Required's ${EnergyRequired.attackEntity.value}. You have ${EnergyData.getEnergy(nbt)} "
                     ),
                     true
                 )
