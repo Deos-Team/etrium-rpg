@@ -3,8 +3,12 @@ package dev.deos.etrium
 import com.mojang.logging.LogUtils
 import dev.deos.etrium.event.AttackBlockEvent
 import dev.deos.etrium.event.AttackEntityEvent
+import dev.deos.etrium.event.PlayerJoinEvent
 import dev.deos.etrium.event.PlayerTickEvent
 import dev.deos.etrium.utils.EnergyData
+import dev.deos.etrium.utils.EnergyData.getEnergy
+import dev.deos.etrium.utils.EnergyData.getMaxEnergy
+import dev.deos.etrium.utils.EnergyData.getRegen
 import dev.deos.etrium.utils.IEntityDataSaver
 import dev.deos.etrium.utils.PlayerTickContainer
 import net.fabricmc.api.ModInitializer
@@ -22,15 +26,19 @@ object Etrium : ModInitializer {
 
         PlayerTickEvent.TICK.register {
             val nbt = it as IEntityDataSaver
-            val testPlayer = it as PlayerTickContainer
-            if (testPlayer.getTicks() % 20 == 0) {
-                if (EnergyData.getEnergy(nbt) >= EnergyData.getMaxEnergy(nbt)) {
-                    it.sendMessage(Text.literal("Max Energy: ${EnergyData.getMaxEnergy(nbt)}"))
-                    it.sendMessage(Text.literal(EnergyData.getRegen(nbt).toString()))
-                    EnergyData.addEnergy(nbt, EnergyData.getRegen(nbt))
-                    it.sendMessage(Text.literal("Energy ${EnergyData.getEnergy(nbt)}/${EnergyData.getMaxEnergy(nbt)}"), true)
-                }
-            }
+            val tick = (it as PlayerTickContainer).getTick()
+            if (tick % 20 != 0) return@register
+            if (nbt.getEnergy() >= nbt.getMaxEnergy()) return@register
+            EnergyData.addEnergy(nbt, nbt.getRegen())
+            it.sendMessage(Text.literal("Energy ${nbt.getEnergy()}/${nbt.getMaxEnergy()}"), true)
+
+        }
+
+        PlayerJoinEvent.JOIN.register {
+            val nbt = it as IEntityDataSaver
+            if (!nbt.getPersistentData().contains("energy")) nbt.getPersistentData().putFloat("energy", 50.0f)
+            if (!nbt.getPersistentData().contains("maxEnergy")) nbt.getPersistentData().putFloat("maxEnergy", 100.0f)
+            if (!nbt.getPersistentData().contains("regen")) nbt.getPersistentData().putFloat("regen", 0.5f)
         }
 
         AttackEntityCallback.EVENT.register(AttackEntityEvent())

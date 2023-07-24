@@ -1,12 +1,14 @@
 package dev.deos.etrium.utils
 
+import net.minecraft.nbt.NbtCompound
+
 object EnergyData {
     fun addEnergy(player: IEntityDataSaver, amount: Float): Float {
         val nbt = player.getPersistentData()
-        var energy = nbt.getFloat("energy")
+        var energy = player.getEnergy()
 
-        if (energy + amount > nbt.getFloat("maxEnergy")) {
-            energy = nbt.getFloat("maxEnergy")
+        if (energy + amount > player.getMaxEnergy()) {
+            energy = player.getMaxEnergy()
         } else {
             energy += amount
         }
@@ -18,7 +20,7 @@ object EnergyData {
 
     fun removeEnergy(player: IEntityDataSaver, amount: Float): Float {
         val nbt = player.getPersistentData()
-        var energy = nbt.getFloat("energy")
+        var energy = player.getEnergy()
 
         if (energy - amount < 0) {
             energy = 0F
@@ -31,18 +33,22 @@ object EnergyData {
         return energy
     }
 
-    fun getEnergy(player: IEntityDataSaver): Float {
-        val nbt = player.getPersistentData()
+    fun IEntityDataSaver.getEnergy(): Float {
+        val nbt = this.getPersistentData()
         return nbt.getFloat("energy")
     }
 
-    fun getMaxEnergy(player: IEntityDataSaver): Float {
-        val nbt = player.getPersistentData()
+    fun IEntityDataSaver.getMaxEnergy(): Float {
+        val nbt = this.getPersistentData()
         return nbt.getFloat("maxEnergy")
     }
 
-    fun getRegen(player: IEntityDataSaver): Float {
-        val nbt = player.getPersistentData()
+    fun IEntityDataSaver.getRegen(): Float {
+        val nbt = this.getPersistentData()
         return nbt.getFloat("regen")
     }
+}
+
+interface IEntityDataSaver {
+    fun getPersistentData(): NbtCompound
 }

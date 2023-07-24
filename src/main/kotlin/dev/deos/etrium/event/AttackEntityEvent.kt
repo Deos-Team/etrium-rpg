@@ -1,8 +1,10 @@
 package dev.deos.etrium.event
 
 import dev.deos.etrium.utils.EnergyData
-import dev.deos.etrium.utils.IEntityDataSaver
+import dev.deos.etrium.utils.EnergyData.getEnergy
+import dev.deos.etrium.utils.EnergyData.getMaxEnergy
 import dev.deos.etrium.utils.EnergyRequired
+import dev.deos.etrium.utils.IEntityDataSaver
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback
 import net.minecraft.entity.Entity
 import net.minecraft.entity.player.PlayerEntity
@@ -23,15 +25,15 @@ class AttackEntityEvent: AttackEntityCallback {
     ): ActionResult {
         if (!world.isClient() && !player.isSpectator) {
             val nbt = player as IEntityDataSaver
-            return if (EnergyData.getEnergy(nbt) >= EnergyRequired.attackEntity.value) {
+            return if (nbt.getEnergy() >= EnergyRequired.attackEntity.value) {
                 EnergyData.removeEnergy(nbt, EnergyRequired.attackEntity.value)
-                player.sendMessage(Text.literal("${EnergyData.getEnergy(nbt)} energy"), true)
+                player.sendMessage(Text.literal("Energy ${nbt.getEnergy()}/${nbt.getMaxEnergy()}"), true)
                 ActionResult.PASS
             } else {
                 player.sendMessage(
                     Text.literal(
                         "Don't enough energy. " +
-                                "Required's ${EnergyRequired.attackEntity.value}. You have ${EnergyData.getEnergy(nbt)} "
+                                "Required's ${EnergyRequired.attackEntity.value}. You have ${nbt.getEnergy()} "
                     ),
                     true
                 )

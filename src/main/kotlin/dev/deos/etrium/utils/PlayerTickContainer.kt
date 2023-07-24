@@ -1,5 +1,5 @@
 package dev.deos.etrium.utils
 
 interface PlayerTickContainer {
-    fun getTicks(): Int
+    fun getTick(): Int
 }
