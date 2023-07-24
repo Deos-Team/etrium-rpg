@@ -35,11 +35,13 @@ public class PlayerEntityMixin implements EnergyContainer {
 
     @Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
     private void onWriteEntityToNBT(NbtCompound compound, CallbackInfo ci) {
+        compound.putFloat("maxEnergy", this.getMaxEnergy());
         compound.putFloat("energy", this.getEnergy());
     }
 
     @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
     private void onReadEntityFromNBT(NbtCompound compound, CallbackInfo ci) {
+        setEnergy(compound.getFloat("maxEnergy"));
         setEnergy(compound.getFloat("energy"));
     }
 
