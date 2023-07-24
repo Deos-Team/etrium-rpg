@@ -13,6 +13,8 @@ public class PlayerEntityMixin implements EnergyContainer {
     private float energy;
     private float maxEnergy = 100F;
 
+    private float regen;
+
     @Override
     public float getEnergy() {
         return this.energy;
@@ -33,16 +35,26 @@ public class PlayerEntityMixin implements EnergyContainer {
         this.maxEnergy = value;
     }
 
+    public float getRegen() {
+        return regen;
+    }
+
+    public void setRegen(float regen) {
+        this.regen = regen;
+    }
+
     @Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
     private void onWriteEntityToNBT(NbtCompound compound, CallbackInfo ci) {
         compound.putFloat("maxEnergy", this.getMaxEnergy());
         compound.putFloat("energy", this.getEnergy());
+        compound.putFloat("regen", this.getRegen());
     }
 
     @Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
     private void onReadEntityFromNBT(NbtCompound compound, CallbackInfo ci) {
         setEnergy(compound.getFloat("maxEnergy"));
         setEnergy(compound.getFloat("energy"));
+        setRegen(compound.getFloat("regen"));
     }
 
 }
