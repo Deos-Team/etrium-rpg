@@ -33,19 +33,16 @@ object EnergyData {
 
     fun getEnergy(player: IEntityDataSaver): Float {
         val nbt = player.getPersistentData()
-
         return nbt.getFloat("energy")
     }
 
     fun getMaxEnergy(player: IEntityDataSaver): Float {
         val nbt = player.getPersistentData()
-        nbt.putFloat("maxEnergy", 100F)
         return nbt.getFloat("maxEnergy")
     }
 
     fun getRegen(player: IEntityDataSaver): Float {
         val nbt = player.getPersistentData()
-        nbt.putFloat("regen", 0.5F)
         return nbt.getFloat("regen")
     }
 }

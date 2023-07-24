@@ -23,7 +23,7 @@ class AttackBlockEvent: AttackBlockCallback {
     ): ActionResult {
         if (!world.isClient() && !player.isSpectator) {
             val nbt = player as IEntityDataSaver
-            return if (EnergyData.getEnergy(nbt) != EnergyRequired.blockBreaking.value) {
+            return if (EnergyData.getEnergy(nbt) >= EnergyRequired.blockBreaking.value) {
                 EnergyData.removeEnergy(nbt, EnergyRequired.blockBreaking.value)
                 player.sendMessage(Text.literal("${EnergyData.getEnergy(nbt)} energy"), true)
                 ActionResult.PASS
