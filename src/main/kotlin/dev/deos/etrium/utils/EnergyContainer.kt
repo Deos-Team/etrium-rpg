@@ -8,4 +8,9 @@ interface EnergyContainer {
     fun getMaxEnergy(): Float
 
     fun setMaxEnergy(value: Float)
+
+    fun getRegenEnergy(): Float
+
+    fun setRegenEnergy(value: Float)
+
 }
