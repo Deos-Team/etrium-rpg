@@ -3,6 +3,6 @@ package dev.deos.etrium.utils
 enum class EnergyRequired(
     val value: Float
 ) {
-    blockBreaking(1.0f),
-    attackEntity(5.0f)
+    BlockBreaking(1.0f),
+    AttackEntity(5.0f)
 }

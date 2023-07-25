@@ -4,9 +4,10 @@ import dev.deos.etrium.utils.EnergyData
 import dev.deos.etrium.utils.EnergyData.getEnergy
 import dev.deos.etrium.utils.EnergyData.getMaxEnergy
 import dev.deos.etrium.utils.EnergyRequired
-import dev.deos.etrium.utils.IEntityDataSaver
+import dev.deos.etrium.utils.EnergyTypes.ENERGY
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
@@ -24,16 +25,16 @@ class AttackBlockEvent: AttackBlockCallback {
         direction: Direction
     ): ActionResult {
         if (!world.isClient() && !player.isSpectator) {
-            val nbt = player as IEntityDataSaver
-            return if (nbt.getEnergy() != EnergyRequired.blockBreaking.value) {
-                EnergyData.removeEnergy(nbt, EnergyRequired.blockBreaking.value)
-                player.sendMessage(Text.literal("Energy ${nbt.getEnergy()}/${nbt.getMaxEnergy()}"), true)
+            player as ServerPlayerEntity
+            return if (player.getEnergy() != EnergyRequired.BlockBreaking.value) {
+                EnergyData.removeEnergy(player, EnergyRequired.BlockBreaking.value, ENERGY)
+                player.sendMessage(Text.literal("Energy ${player.getEnergy()}/${player.getMaxEnergy()}"), true)
                 ActionResult.PASS
             } else {
                 player.sendMessage(
                     Text.literal(
                         "Don't enough energy. " +
-                                "Required's ${EnergyRequired.blockBreaking.value}. You have ${nbt.getEnergy()} "
+                                "Required's ${EnergyRequired.BlockBreaking.value}. You have ${player.getEnergy()} "
                     ),
                     true
                 )
