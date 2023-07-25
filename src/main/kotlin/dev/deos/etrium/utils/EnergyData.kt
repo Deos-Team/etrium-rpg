@@ -3,11 +3,11 @@ package dev.deos.etrium.utils
 import dev.deos.etrium.utils.EnergyTypes.ENERGY
 import dev.deos.etrium.utils.EnergyTypes.MAX_ENERGY
 import dev.deos.etrium.utils.EnergyTypes.REGEN
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.nbt.NbtCompound
-import net.minecraft.server.network.ServerPlayerEntity
 
 object EnergyData {
-    fun addEnergy(player: ServerPlayerEntity, amount: Float, type: String) {
+    fun addEnergy(player: PlayerEntity, amount: Float, type: String) {
         val nbt = (player as IEntityDataSaver).getPersistentData()
         when (type) {
             ENERGY -> {
@@ -20,7 +20,7 @@ object EnergyData {
         }
     }
 
-    fun removeEnergy(player: ServerPlayerEntity, amount: Float, type: String) {
+    fun removeEnergy(player: PlayerEntity, amount: Float, type: String) {
         val nbt = (player as IEntityDataSaver).getPersistentData()
         when (type) {
             ENERGY -> {
@@ -49,10 +49,13 @@ object EnergyData {
         }
     }
 
-    fun setEnergy(player: ServerPlayerEntity, amount: Float, type: String) {
+    fun setEnergy(player: PlayerEntity, amount: Float, type: String) {
         val nbt = (player as IEntityDataSaver).getPersistentData()
         when (type) {
-            ENERGY -> nbt.putFloat(ENERGY, amount)
+            ENERGY -> {
+                nbt.putFloat(ENERGY, amount)
+            }
+
             MAX_ENERGY -> {
                 nbt.putFloat(MAX_ENERGY, amount)
                 if (amount < player.getEnergy()) setEnergy(player, player.getMaxEnergy(), ENERGY)
@@ -62,20 +65,23 @@ object EnergyData {
         }
     }
 
-    fun ServerPlayerEntity.getEnergy(): Float {
+    fun PlayerEntity.getEnergy(): Float {
         val nbt = (this as IEntityDataSaver).getPersistentData()
         return nbt.getFloat(ENERGY)
     }
 
-    fun ServerPlayerEntity.getMaxEnergy(): Float {
+    fun PlayerEntity.getMaxEnergy(): Float {
         val nbt = (this as IEntityDataSaver).getPersistentData()
         return nbt.getFloat(MAX_ENERGY)
     }
 
-    fun ServerPlayerEntity.getRegen(): Float {
+    fun PlayerEntity.getRegen(): Float {
         val nbt = (this as IEntityDataSaver).getPersistentData()
         return nbt.getFloat(REGEN)
     }
+
+
+
 }
 
 interface IEntityDataSaver {

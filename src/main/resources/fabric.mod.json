@@ -21,6 +21,12 @@
         "adapter": "kotlin",
         "value": "dev.deos.etrium.Etrium"
       }
+    ],
+    "client": [
+      {
+        "adapter": "kotlin",
+        "value": "dev.deos.etrium.EtriumClient"
+      }
     ]
   },
   "custom": {
