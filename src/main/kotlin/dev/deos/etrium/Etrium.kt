@@ -6,6 +6,7 @@ import dev.deos.etrium.event.AttackBlockEvent
 import dev.deos.etrium.event.AttackEntityEvent
 import dev.deos.etrium.event.PlayerJoinEvent
 import dev.deos.etrium.event.PlayerTickEvent
+import dev.deos.etrium.init.Init
 import dev.deos.etrium.network.DataPackets
 import dev.deos.etrium.utils.EnergyData
 import dev.deos.etrium.utils.EnergyData.getEnergy

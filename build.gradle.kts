@@ -35,6 +35,9 @@ dependencies {
     val fabricVersion: String by project
     modImplementation("net.fabricmc.fabric-api", "fabric-api", fabricVersion)
 
+    modApi("maven.modrinth:libz:1.0.1+1.20") {
+        exclude(group = "net.fabricmc.fabric-api")
+    }
 
     modImplementation("net.fabricmc", "fabric-language-kotlin", fabricKotlinVersion)
 

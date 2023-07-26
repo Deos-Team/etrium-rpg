@@ -1,4 +1,4 @@
-package dev.deos.etrium
+package dev.deos.etrium.init
 
 import dev.deos.etrium.command.EnergyCommand
 import dev.deos.etrium.config.ConfigManager
