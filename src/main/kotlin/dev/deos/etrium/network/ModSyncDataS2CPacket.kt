@@ -14,17 +14,10 @@ object ModSyncDataS2CPacket {
         (client.player as IEntityDataSaver).getPersistentData().putFloat("energy", buf.readFloat())
     }
 
-    fun healthReceive(
+    fun maxEnergyReceive(
         client: MinecraftClient, handler: ClientPlayNetworkHandler,
         buf: PacketByteBuf, responseSender: PacketSender
     ) {
-        (client.player as IEntityDataSaver).getPersistentData().putInt("health", buf.readInt())
-    }
-
-    fun maxHealthReceive(
-        client: MinecraftClient, handler: ClientPlayNetworkHandler,
-        buf: PacketByteBuf, responseSender: PacketSender
-    ) {
-        (client.player as IEntityDataSaver).getPersistentData().putInt("maxHealth", buf.readInt())
+        (client.player as IEntityDataSaver).getPersistentData().putFloat("maxEnergy", buf.readFloat())
     }
 }

@@ -2,7 +2,6 @@ package dev.deos.etrium
 
 import com.mojang.logging.LogUtils
 import dev.deos.etrium.config.ConfigManager
-import dev.deos.etrium.event.AttackBlockEvent
 import dev.deos.etrium.event.AttackEntityEvent
 import dev.deos.etrium.event.PlayerJoinEvent
 import dev.deos.etrium.event.PlayerTickEvent
@@ -11,6 +10,7 @@ import dev.deos.etrium.utils.EnergyData
 import dev.deos.etrium.utils.EnergyData.getEnergy
 import dev.deos.etrium.utils.EnergyData.getMaxEnergy
 import dev.deos.etrium.utils.EnergyData.getRegen
+import dev.deos.etrium.utils.EnergyRequired
 import dev.deos.etrium.utils.EnergyTypes.ENERGY
 import dev.deos.etrium.utils.EnergyTypes.HEALTH
 import dev.deos.etrium.utils.EnergyTypes.MAX_ENERGY
@@ -20,13 +20,19 @@ import dev.deos.etrium.utils.IEntityDataSaver
 import dev.deos.etrium.utils.PlayerTickContainer
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.player.AttackBlockCallback
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
+import net.minecraft.block.BlockState
+import net.minecraft.block.entity.BlockEntity
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.text.Text
+import net.minecraft.util.math.BlockPos
 import net.minecraft.world.GameRules
+import net.minecraft.world.World
 import org.slf4j.Logger
 
 object Etrium : ModInitializer {
@@ -38,8 +44,7 @@ object Etrium : ModInitializer {
         PlayerJoinEvent.JOIN.register(::onPlayerFirstJoin)
         ServerLifecycleEvents.SERVER_STARTED.register(::onServerStart)
         AttackEntityCallback.EVENT.register(AttackEntityEvent())
-        AttackBlockCallback.EVENT.register(AttackBlockEvent())
-
+        PlayerBlockBreakEvents.BEFORE.register(::onBlockBreaking)
     }
 
     private fun onPlayerFirstJoin(player: ServerPlayerEntity) {
@@ -56,12 +61,31 @@ object Etrium : ModInitializer {
             .putFloat(REGEN, ConfigManager.readCfg().default.regen)
     }
 
+    private fun onBlockBreaking(
+        world: World, playerEntity: PlayerEntity, blockPos: BlockPos,
+        blockState: BlockState, blockEntity: BlockEntity?
+    ): Boolean {
+        if (!world.isClient() && !playerEntity.isSpectator) {
+            return if (playerEntity.getEnergy() >= EnergyRequired.BlockBreaking.value) {
+                if (!playerEntity.isCreative) {
+                    EnergyData.removeEnergy(playerEntity, EnergyRequired.BlockBreaking.value, ENERGY)
+                }
+                true
+            } else {
+                playerEntity.sendMessage(
+                    Text.literal("Don't enough energy"), true
+                )
+                false
+            }
+        }
+        return false
+    }
+
     private fun onPlayerTick(player: ServerPlayerEntity) {
         val tick = (player as PlayerTickContainer).getTick()
         if (tick % 4 == 0) {
             syncEnergy(player.getEnergy(), player)
-            syncHealth(player.health.toInt(), player)
-            syncMaxHealth(player.maxHealth.toInt(), player)
+            syncMaxEnergy(player.getMaxEnergy(), player)
         }
         if (tick % 20 != 0) return
         if (player.getEnergy() >= player.getMaxEnergy()) return
@@ -79,16 +103,10 @@ object Etrium : ModInitializer {
         ServerPlayNetworking.send(player, DataPackets.ENERGY_ID, buf)
     }
 
-    private fun syncHealth(health: Int, player: ServerPlayerEntity) {
+    private fun syncMaxEnergy(energy: Float, player: ServerPlayerEntity) {
         val buf = PacketByteBufs.create()
-        buf.writeInt(health)
-        ServerPlayNetworking.send(player, DataPackets.HEALTH_ID, buf)
-    }
-
-    private fun syncMaxHealth(health: Int, player: ServerPlayerEntity) {
-        val buf = PacketByteBufs.create()
-        buf.writeInt(health)
-        ServerPlayNetworking.send(player, DataPackets.MAX_HEALTH_ID, buf)
+        buf.writeFloat(energy)
+        ServerPlayNetworking.send(player, DataPackets.MAX_ENERGY_ID, buf)
     }
 
 }
