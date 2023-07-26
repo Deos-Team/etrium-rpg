@@ -12,7 +12,9 @@ import dev.deos.etrium.utils.EnergyData.getEnergy
 import dev.deos.etrium.utils.EnergyData.getMaxEnergy
 import dev.deos.etrium.utils.EnergyData.getRegen
 import dev.deos.etrium.utils.EnergyTypes.ENERGY
+import dev.deos.etrium.utils.EnergyTypes.HEALTH
 import dev.deos.etrium.utils.EnergyTypes.MAX_ENERGY
+import dev.deos.etrium.utils.EnergyTypes.MAX_HEALTH
 import dev.deos.etrium.utils.EnergyTypes.REGEN
 import dev.deos.etrium.utils.IEntityDataSaver
 import dev.deos.etrium.utils.PlayerTickContainer
@@ -42,6 +44,10 @@ object Etrium : ModInitializer {
 
     private fun onPlayerFirstJoin(player: ServerPlayerEntity) {
         val nbt = player as IEntityDataSaver
+        if (!nbt.getPersistentData().contains(HEALTH)) nbt.getPersistentData()
+            .putInt(HEALTH, player.maxHealth.toInt())
+        if (!nbt.getPersistentData().contains(MAX_HEALTH)) nbt.getPersistentData()
+            .putInt(MAX_HEALTH, player.maxHealth.toInt())
         if (!nbt.getPersistentData().contains(ENERGY)) nbt.getPersistentData()
             .putFloat(ENERGY, ConfigManager.readCfg().default.energy)
         if (!nbt.getPersistentData().contains(MAX_ENERGY)) nbt.getPersistentData()
@@ -52,7 +58,11 @@ object Etrium : ModInitializer {
 
     private fun onPlayerTick(player: ServerPlayerEntity) {
         val tick = (player as PlayerTickContainer).getTick()
-        if (tick % 4 == 0) syncEnergy(player.getEnergy(), player as ServerPlayerEntity)
+        if (tick % 4 == 0) {
+            syncEnergy(player.getEnergy(), player)
+            syncHealth(player.health.toInt(), player)
+            syncMaxHealth(player.maxHealth.toInt(), player)
+        }
         if (tick % 20 != 0) return
         if (player.getEnergy() >= player.getMaxEnergy()) return
         EnergyData.addEnergy(player, player.getRegen(), ENERGY)
@@ -67,6 +77,18 @@ object Etrium : ModInitializer {
         val buf = PacketByteBufs.create()
         buf.writeFloat(energy)
         ServerPlayNetworking.send(player, DataPackets.ENERGY_ID, buf)
+    }
+
+    private fun syncHealth(health: Int, player: ServerPlayerEntity) {
+        val buf = PacketByteBufs.create()
+        buf.writeInt(health)
+        ServerPlayNetworking.send(player, DataPackets.HEALTH_ID, buf)
+    }
+
+    private fun syncMaxHealth(health: Int, player: ServerPlayerEntity) {
+        val buf = PacketByteBufs.create()
+        buf.writeInt(health)
+        ServerPlayNetworking.send(player, DataPackets.MAX_HEALTH_ID, buf)
     }
 
 }

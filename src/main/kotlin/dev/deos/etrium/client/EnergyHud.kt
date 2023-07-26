@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.render.GameRenderer
-import net.minecraft.client.render.RenderLayer
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
 import net.minecraft.util.Identifier
@@ -16,16 +15,15 @@ import net.minecraft.util.math.ColorHelper.Argb
 class EnergyHud : HudRenderCallback {
 
     private val FILLED_ENERGY = Identifier(Etrium.MI, "textures/energy/filled_energy.png")
+    private val HUD = Identifier(Etrium.MI, "textures/hud/hud.png")
+    private val client = MinecraftClient.getInstance()
+    private var height = 0f
+    private var width = 0f
 
     override fun onHudRender(drawContext: DrawContext, tickDelta: Float) {
-        var x = 0f
-        var y = 0f
-        val client = MinecraftClient.getInstance()
         if (client != null) {
-            val width = client.window.scaledWidth.toFloat()
-            val height = client.window.scaledHeight.toFloat()
-            x = width
-            y = height
+            height = drawContext.scaledWindowHeight.toFloat()
+            width = drawContext.scaledWindowWidth.toFloat()
         }
         val yellow = takeColor(245, 203, 66)
         val black = takeColor(0, 0, 0)
@@ -34,14 +32,14 @@ class EnergyHud : HudRenderCallback {
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f)
         RenderSystem.setShaderTexture(0, FILLED_ENERGY)
 
-        drawContext.fill(
+        /*drawContext.fill(
             RenderLayer.getGuiOverlay(),
-            (x / 1.005).toInt(),
-            (y / 1.02).toInt(),
-            (x / 1.065).toInt(),
-            (y / 1.40).toInt(),
+            (width / 1.005).toInt(),
+            (height / 1.02).toInt(),
+            (width / 1.065).toInt(),
+            (height / 1.40).toInt(),
             yellow
-        )
+        )*/
         /*drawContext.fill(
             RenderLayer.getGuiOverlay(),
             (x / 1.23).toInt(),
@@ -54,9 +52,28 @@ class EnergyHud : HudRenderCallback {
         val energy = (client.player as IEntityDataSaver).getPersistentData().getFloat("energy")
         drawContext.drawText(
             client.textRenderer, Text.literal(energy.toInt().toString()).formatted(Formatting.BOLD),
-            (x / 1.045).toInt(), (y / 1.20).toInt(), white, false
+            (width / 1.045).toInt(), (height / 1.20).toInt(), white, false
         )
 
+        renderHealthBar(drawContext)
+
+    }
+
+    private fun renderHealthBar(drawContext: DrawContext) {
+        drawContext.drawTexture(HUD, (width / 1.5).toInt(), (height / 1.5).toInt(), 0, 0, 80, 8)
+        val health = (client.player as IEntityDataSaver).getPersistentData().getInt("health")
+        val maxHealth = (client.player as IEntityDataSaver).getPersistentData().getInt("maxHealth")
+        if (health > 0) {
+            drawContext.drawTexture(
+                HUD,
+                (width / 1.5).toInt(),
+                (height / 1.5).toInt(),
+                0,
+                8,
+                (80f * (health.toFloat() / maxHealth.toFloat())).toInt(),
+                8
+            )
+        }
     }
 
     private fun takeColor(r: Int, g: Int, b: Int, invis: Int = 255): Int {
