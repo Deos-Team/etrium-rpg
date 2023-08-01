@@ -26,7 +26,7 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 
     @Inject(method = "mouseClicked", at = @At("HEAD"))
     private void mouseClickedMixin(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> info) {
-        DrawTabHelper.INSTANCE.onTabButtonClick(client, this, this.x, this.y, mouseX, mouseY, this.focusedSlot != null);
+        DrawTabHelper.INSTANCE.onTabButtonClick(client, this, this.x - 24, this.y + 5, mouseX, mouseY, this.focusedSlot != null);
     }
 
     @Inject(method = "drawBackground", at = @At("TAIL"))

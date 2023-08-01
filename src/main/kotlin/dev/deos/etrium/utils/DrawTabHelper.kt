@@ -15,46 +15,22 @@ import net.minecraft.text.Text
 object DrawTabHelper {
     fun drawTab(client: MinecraftClient?, context: DrawContext, screenClass: Screen, x: Int, y: Int, mouseX: Int, mouseY: Int) {
         if (client?.player != null && screenClass is Tab) {
-            var xPos = x
+            var xPos = x - 24
             var shownTooltip: Text? = null
             val list: List<InventoryTab> = EtriumClient.invTabs
             for (i in list.indices) {
                 val inventoryTab = list[i]
                 if (inventoryTab.shouldShow(client)) {
-                    val isFirstTab = i == 0
-                    val isSelectedTab = inventoryTab.isSelectedScreen(screenClass.javaClass)
-                    var textureX = if (isFirstTab) 24 else 72
-                    if (isSelectedTab) {
-                        textureX -= 24
-                    }
-                    context.drawTexture(
-                        EtriumClient.tabTexture,
-                        xPos,
-                        if (isSelectedTab) y - 23 else y - 21,
-                        textureX,
-                        0,
-                        24,
-                        if (isSelectedTab) 27 else if (isFirstTab) 25 else 21
-                    )
+                    var textureX = 24
+                    context.drawTexture(EtriumClient.tabTexture, xPos, y, textureX, 0, 24, 21)
                     if (inventoryTab.texture != null) {
-                        context.drawTexture(inventoryTab.texture, xPos + 5, y - 16, 0.0f, 0.0f, 14, 14, 14, 14)
+                        context.drawTexture(inventoryTab.texture, xPos + 5, y + 4, 0.0f, 0.0f, 14, 14, 14, 14)
                     } else if (inventoryTab.getItemStack(client) != null) {
-                        context.drawItem(inventoryTab.getItemStack(client), xPos + 4, y - 17)
+                        context.drawItem(inventoryTab.getItemStack(client), xPos, y + 5)
                     }
-                    if (!isSelectedTab && isPointWithinBounds(
-                            x,
-                            y,
-                            xPos - x + 1,
-                            -20,
-                            22,
-                            19,
-                            mouseX.toDouble(),
-                            mouseY.toDouble()
-                        )
-                    ) {
+                    if (isPointWithinBounds(x, y, xPos - x + 1, 5, 22, 19, mouseX.toDouble(), mouseY.toDouble())) {
                         shownTooltip = inventoryTab.title
                     }
-                    xPos += 25
                 }
             }
             if (shownTooltip != null) {
@@ -78,21 +54,9 @@ object DrawTabHelper {
             for (i in list.indices) {
                 val inventoryTab = list[i]
                 if (inventoryTab.shouldShow(client)) {
-                    val isSelectedTab = inventoryTab.isSelectedScreen(screenClass.javaClass)
-                    if (inventoryTab.canClick(screenClass.javaClass, client) && isPointWithinBounds(
-                            x,
-                            y,
-                            xPos - x + 1,
-                            if (isSelectedTab) -24 else -20,
-                            22,
-                            if (isSelectedTab) 23 else 19,
-                            mouseX,
-                            mouseY
-                        )
-                    ) {
+                    if (inventoryTab.canClick(screenClass.javaClass, client) && isPointWithinBounds(x, y, xPos - x + 1, 5, 22, 19, mouseX, mouseY)) {
                         inventoryTab.onClick(client)
                     }
-                    xPos += 25
                 }
             }
         }
