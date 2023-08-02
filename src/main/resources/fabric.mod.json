@@ -27,6 +27,12 @@
         "adapter": "kotlin",
         "value": "dev.deos.etrium.EtriumClient"
       }
+    ],
+    "fabric-datagen": [
+      {
+        "adapter": "kotlin",
+        "value": "dev.deos.etrium.datagen.ModDatagen"
+      }
     ]
   },
   "custom": {

@@ -8,9 +8,11 @@ object DataPackets {
 
     val ENERGY_ID = Identifier(Etrium.MI, "energy_sync")
     val MAX_ENERGY_ID = Identifier(Etrium.MI, "max_energy_sync")
+    val LEVEL_ID = Identifier(Etrium.MI, "level_sync")
 
     fun registerS2CPackets() {
         ClientPlayNetworking.registerGlobalReceiver(ENERGY_ID, ModSyncDataS2CPacket::energyReceive)
         ClientPlayNetworking.registerGlobalReceiver(MAX_ENERGY_ID, ModSyncDataS2CPacket::maxEnergyReceive)
+        ClientPlayNetworking.registerGlobalReceiver(LEVEL_ID, ModSyncDataS2CPacket::levelRecieve)
     }
 }

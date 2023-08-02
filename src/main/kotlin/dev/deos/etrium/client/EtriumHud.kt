@@ -2,14 +2,20 @@ package dev.deos.etrium.client
 
 import com.mojang.blaze3d.systems.RenderSystem
 import dev.deos.etrium.Etrium
+import dev.deos.etrium.utils.EnergyTypes.LEVEL
 import dev.deos.etrium.utils.IEntityDataSaver
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.render.GameRenderer
+import net.minecraft.entity.data.DataTracker
+import net.minecraft.entity.data.TrackedData
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.text.Text
+import net.minecraft.util.Formatting
 import net.minecraft.util.Identifier
+import net.minecraft.util.hit.EntityHitResult
+import net.minecraft.util.hit.HitResult
 import net.minecraft.util.math.ColorHelper.Argb
 
 
@@ -43,7 +49,23 @@ class EtriumHud : HudRenderCallback {
             }
         }
 
+        drawContext.apply {
+//            renderEntityLevel()
+        }
 
+    }
+
+    private fun DrawContext.renderEntityLevel() {
+        if (client.crosshairTarget == null) return
+        if (client.crosshairTarget!!.type != HitResult.Type.ENTITY) return
+        val entity = (client.crosshairTarget as EntityHitResult).entity
+        val level = (entity as IEntityDataSaver).getPersistentData().getInt(LEVEL)
+        RenderSystem.enableBlend()
+        this.drawTextWithShadow(
+            client.textRenderer, Text.literal(level.toString()).formatted(Formatting.BOLD),
+            (width * 0.01f).toInt(), (height * 0.95f).toInt(), white
+        )
+        RenderSystem.disableBlend()
     }
 
     private fun DrawContext.renderHealthBar() {

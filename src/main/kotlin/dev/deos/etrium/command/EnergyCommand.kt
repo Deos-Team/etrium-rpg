@@ -2,14 +2,19 @@ package dev.deos.etrium.command
 
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.FloatArgumentType
+import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.builder.RequiredArgumentBuilder
-import dev.deos.etrium.utils.EnergyData
-import dev.deos.etrium.utils.EnergyData.getEnergy
-import dev.deos.etrium.utils.EnergyData.getMaxEnergy
-import dev.deos.etrium.utils.EnergyData.getRegen
+import dev.deos.etrium.utils.EtriumData
+import dev.deos.etrium.utils.EtriumData.getEnergy
+import dev.deos.etrium.utils.EtriumData.getLevel
+import dev.deos.etrium.utils.EtriumData.getMaxEnergy
+import dev.deos.etrium.utils.EtriumData.getRegen
+import dev.deos.etrium.utils.EtriumData.getXp
 import dev.deos.etrium.utils.EnergyTypes.ENERGY
+import dev.deos.etrium.utils.EnergyTypes.LEVEL
 import dev.deos.etrium.utils.EnergyTypes.MAX_ENERGY
 import dev.deos.etrium.utils.EnergyTypes.REGEN
+import dev.deos.etrium.utils.EnergyTypes.XP
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.minecraft.command.CommandRegistryAccess
 import net.minecraft.command.EntitySelector
@@ -39,7 +44,7 @@ object EnergyCommand {
                                                         " Now your energy is ${player.getEnergy()}/${player.getMaxEnergy()}"
                                             ), true
                                         )
-                                        EnergyData.addEnergy(player, amount, ENERGY)
+                                        EtriumData.addEnergy(player, amount, ENERGY)
                                         0
                                     }
                                 )
@@ -51,7 +56,7 @@ object EnergyCommand {
                                     .executes {
                                         val player = EntityArgumentType.getPlayer(it, "player")
                                         val amount = FloatArgumentType.getFloat(it, "amount")
-                                        EnergyData.addEnergy(player, amount, MAX_ENERGY)
+                                        EtriumData.addEnergy(player, amount, MAX_ENERGY)
                                         player.sendMessage(
                                             Text.literal(
                                                 "Has been added a $amount max energy." +
@@ -69,12 +74,51 @@ object EnergyCommand {
                                     .executes {
                                         val player = EntityArgumentType.getPlayer(it, "player")
                                         val amount = FloatArgumentType.getFloat(it, "amount")
-                                        EnergyData.addEnergy(player, amount, REGEN)
+                                        EtriumData.addEnergy(player, amount, REGEN)
                                         player.sendMessage(
                                             Text.literal(
                                                 "Has been added a $amount regen." +
                                                         " Now your regen is ${player.getRegen()}"
                                             ), true
+                                        )
+                                        0
+                                    }
+                                )
+                            )
+                        )
+                        .then(CommandManager.literal("add")
+                            .then(CommandManager.literal(LEVEL)
+                                .then(CommandManager.argument("amount", IntegerArgumentType.integer())
+                                    .executes {
+                                        val player = EntityArgumentType.getPlayer(it, "player")
+                                        val amount = IntegerArgumentType.getInteger(it, "amount")
+                                        EtriumData.addLevel(player, amount, LEVEL)
+                                        player.sendMessage(
+                                            Text.literal(
+                                                "Has been added a $amount level." +
+                                                        " Now your level is ${player.getLevel()}"
+                                            ), true
+                                        )
+                                        0
+                                    }
+                                )
+                            )
+                        )
+                        .then(
+                            CommandManager.literal("add")
+                                .then(
+                                    CommandManager.literal(XP)
+                                        .then(
+                                            CommandManager.argument("amount", IntegerArgumentType.integer())
+                                                .executes {
+                                                    val player = EntityArgumentType.getPlayer(it, "player")
+                                                    val amount = IntegerArgumentType.getInteger(it, "amount")
+                                                    EtriumData.addLevel(player, amount, XP)
+                                                    player.sendMessage(
+                                                        Text.literal(
+                                                            "Has been added a $amount xp." +
+                                                                    " Now your xp is ${player.getXp()}"
+                                                        ), true
                                         )
                                         0
                                     }
@@ -87,7 +131,7 @@ object EnergyCommand {
                                     .executes {
                                         val player = EntityArgumentType.getPlayer(it, "player")
                                         val amount = FloatArgumentType.getFloat(it, "amount")
-                                        EnergyData.removeEnergy(player, amount, ENERGY)
+                                        EtriumData.removeEnergy(player, amount, ENERGY)
                                         player.sendMessage(
                                             Text.literal(
                                                 "Has been removed a $amount energy." +
@@ -105,7 +149,7 @@ object EnergyCommand {
                                     .executes {
                                         val player = EntityArgumentType.getPlayer(it, "player")
                                         val amount = FloatArgumentType.getFloat(it, "amount")
-                                        EnergyData.removeEnergy(player, amount, MAX_ENERGY)
+                                        EtriumData.removeEnergy(player, amount, MAX_ENERGY)
                                         player.sendMessage(
                                             Text.literal(
                                                 "Has been removed a $amount max energy." +
@@ -123,12 +167,51 @@ object EnergyCommand {
                                     .executes {
                                         val player = EntityArgumentType.getPlayer(it, "player")
                                         val amount = FloatArgumentType.getFloat(it, "amount")
-                                        EnergyData.removeEnergy(player, amount, REGEN)
+                                        EtriumData.removeEnergy(player, amount, REGEN)
                                         player.sendMessage(
                                             Text.literal(
                                                 "Has been removed a $amount regen." +
                                                         " Now your regen is ${player.getRegen()}"
                                             ), true
+                                        )
+                                        0
+                                    }
+                                )
+                            )
+                        )
+                        .then(CommandManager.literal("remove")
+                            .then(CommandManager.literal(LEVEL)
+                                .then(CommandManager.argument("amount", IntegerArgumentType.integer())
+                                    .executes {
+                                        val player = EntityArgumentType.getPlayer(it, "player")
+                                        val amount = IntegerArgumentType.getInteger(it, "amount")
+                                        EtriumData.removeLevel(player, amount, LEVEL)
+                                        player.sendMessage(
+                                            Text.literal(
+                                                "Has been removed a $amount level." +
+                                                        " Now your level is ${player.getLevel()}"
+                                            ), true
+                                        )
+                                        0
+                                    }
+                                )
+                            )
+                        )
+                        .then(
+                            CommandManager.literal("remove")
+                                .then(
+                                    CommandManager.literal(XP)
+                                        .then(
+                                            CommandManager.argument("amount", IntegerArgumentType.integer())
+                                                .executes {
+                                                    val player = EntityArgumentType.getPlayer(it, "player")
+                                                    val amount = IntegerArgumentType.getInteger(it, "amount")
+                                                    EtriumData.removeLevel(player, amount, XP)
+                                                    player.sendMessage(
+                                                        Text.literal(
+                                                            "Has been removed a $amount xp." +
+                                                                    " Now your xp is ${player.getXp()}"
+                                                        ), true
                                         )
                                         0
                                     }
@@ -141,7 +224,7 @@ object EnergyCommand {
                                     .executes {
                                         val player = EntityArgumentType.getPlayer(it, "player")
                                         val amount = FloatArgumentType.getFloat(it, "amount")
-                                        EnergyData.setEnergy(player, amount, ENERGY)
+                                        EtriumData.setEnergy(player, amount, ENERGY)
                                         player.sendMessage(
                                             Text.literal("Now your energy is ${player.getEnergy()}/${player.getMaxEnergy()}"),
                                             true
@@ -157,7 +240,7 @@ object EnergyCommand {
                                     .executes {
                                         val player = EntityArgumentType.getPlayer(it, "player")
                                         val amount = FloatArgumentType.getFloat(it, "amount")
-                                        EnergyData.setEnergy(player, amount, MAX_ENERGY)
+                                        EtriumData.setEnergy(player, amount, MAX_ENERGY)
                                         player.sendMessage(
                                             Text.literal("Now your max energy is ${player.getMaxEnergy()}"),
                                             true
@@ -173,10 +256,45 @@ object EnergyCommand {
                                     .executes {
                                         val player = EntityArgumentType.getPlayer(it, "player")
                                         val amount = FloatArgumentType.getFloat(it, "amount")
-                                        EnergyData.setEnergy(player, amount, REGEN)
+                                        EtriumData.setEnergy(player, amount, REGEN)
                                         player.sendMessage(
                                             Text.literal("Now your regen is ${player.getRegen()}"),
                                             true
+                                        )
+                                        0
+                                    }
+                                )
+                            )
+                        )
+                        .then(CommandManager.literal("set")
+                            .then(CommandManager.literal(LEVEL)
+                                .then(CommandManager.argument("amount", IntegerArgumentType.integer())
+                                    .executes {
+                                        val player = EntityArgumentType.getPlayer(it, "player")
+                                        val amount = IntegerArgumentType.getInteger(it, "amount")
+                                        EtriumData.setLevel(player, amount, LEVEL)
+                                        player.sendMessage(
+                                            Text.literal("Now your level is ${player.getLevel()}"),
+                                            true
+                                        )
+                                        0
+                                    }
+                                )
+                            )
+                        )
+                        .then(
+                            CommandManager.literal("set")
+                                .then(
+                                    CommandManager.literal(XP)
+                                        .then(
+                                            CommandManager.argument("amount", IntegerArgumentType.integer())
+                                                .executes {
+                                                    val player = EntityArgumentType.getPlayer(it, "player")
+                                                    val amount = IntegerArgumentType.getInteger(it, "amount")
+                                                    EtriumData.setLevel(player, amount, XP)
+                                                    player.sendMessage(
+                                                        Text.literal("Now your xp is ${player.getXp()}"),
+                                                        true
                                         )
                                         0
                                     }
@@ -213,6 +331,30 @@ object EnergyCommand {
                                     val player = EntityArgumentType.getPlayer(it, "player")
                                     player.sendMessage(
                                         Text.literal("${player.name.string} regen: ${player.getRegen()}"),
+                                        true
+                                    )
+                                    0
+                                }
+                            )
+                        )
+                        .then(CommandManager.literal("get")
+                            .then(CommandManager.literal(LEVEL)
+                                .executes {
+                                    val player = EntityArgumentType.getPlayer(it, "player")
+                                    player.sendMessage(
+                                        Text.literal("${player.name.string} level: ${player.getLevel()}"),
+                                        true
+                                    )
+                                    0
+                                }
+                            )
+                        )
+                        .then(CommandManager.literal("get")
+                            .then(CommandManager.literal(XP)
+                                .executes {
+                                    val player = EntityArgumentType.getPlayer(it, "player")
+                                    player.sendMessage(
+                                        Text.literal("${player.name.string} xp: ${player.getXp()}"),
                                         true
                                     )
                                     0

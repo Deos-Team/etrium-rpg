@@ -95,3 +95,23 @@ tasks {
         withSourcesJar()
     }
 }
+
+val generatedResources = "src/generated/resources"
+
+loom {
+    runs {
+        create("Data Generation") {
+            client()
+            vmArg("-Dfabric-api.datagen")
+            vmArg("-Dfabric-api.datagen.output-dir=${file(generatedResources)}")
+            vmArg("-Dfabric-api.datagen.modid=${modId}")
+            runDir("build/datagen")
+        }
+    }
+}
+
+sourceSets.main {
+    resources {
+        srcDir(generatedResources)
+    }
+}

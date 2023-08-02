@@ -1,11 +1,12 @@
 package dev.deos.etrium.mixin;
 
-import dev.deos.etrium.event.PlayerJoinEvent;
+import dev.deos.etrium.event.EntityKillEvent;
 import dev.deos.etrium.event.PlayerTickEvent;
 import dev.deos.etrium.utils.PlayerTickContainer;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.stat.ServerStatHandler;
-import net.minecraft.stat.Stats;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,10 +26,10 @@ public class ServerPlayerMixin implements PlayerTickContainer {
         PlayerTickEvent.INSTANCE.getTICK().invoker().onTick((ServerPlayerEntity) (Object) this);
     }
 
-    @Inject(method = "onSpawn", at = @At("TAIL"))
-    public void onJoin(CallbackInfo ci) {
-        if (this.statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.LEAVE_GAME)) >= 1) return;
-        PlayerJoinEvent.INSTANCE.getJOIN().invoker().onJoin((ServerPlayerEntity) (Object) this);
+    @Inject(method = "updateKilledAdvancementCriterion", at = @At("TAIL"))
+    protected void onKill(Entity entityKilled, int score, DamageSource damageSource, CallbackInfo ci) {
+        if (entityKilled.isPlayer()) return;
+        EntityKillEvent.INSTANCE.getKill().invoker().onKill((ServerPlayerEntity) (Object) this, entityKilled);
     }
 
     @Override

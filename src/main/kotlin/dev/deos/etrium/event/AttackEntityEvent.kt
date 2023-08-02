@@ -1,12 +1,13 @@
 package dev.deos.etrium.event
 
-import dev.deos.etrium.utils.EnergyData
-import dev.deos.etrium.utils.EnergyData.getEnergy
+import dev.deos.etrium.utils.EtriumData
+import dev.deos.etrium.utils.EtriumData.getEnergy
 import dev.deos.etrium.utils.EnergyRequired
 import dev.deos.etrium.utils.EnergyTypes.ENERGY
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback
 import net.minecraft.entity.Entity
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
@@ -25,7 +26,7 @@ class AttackEntityEvent: AttackEntityCallback {
         if (!world.isClient() && !player.isSpectator) {
             return if (player.getEnergy() >= EnergyRequired.AttackEntity.value) {
                 if (!player.isCreative) {
-                    EnergyData.removeEnergy(player, EnergyRequired.AttackEntity.value, ENERGY)
+                    EtriumData.removeEnergy(player, EnergyRequired.AttackEntity.value, ENERGY)
                 }
                 ActionResult.PASS
             } else {

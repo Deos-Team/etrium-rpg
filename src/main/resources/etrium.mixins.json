@@ -6,8 +6,11 @@
     "defaultRequire": 1
   },
   "mixins": [
-    "PlayerMixin",
-    "ServerPlayerMixin"
+    "ChunkRegionMixin",
+    "LivingEntityMixin",
+    "PlayerManagerMixin",
+    "ServerPlayerMixin",
+    "ServerWorldMixin"
   ],
   "client": [
     "HudPlayerMixin"
