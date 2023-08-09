@@ -14,8 +14,9 @@ object ModSyncDataC2SPacket {
         server: MinecraftServer, player: ServerPlayerEntity,
         handler: ServerPlayNetworkHandler, buf: PacketByteBuf, responseSender: PacketSender
     ) {
-        val entity = player.world.getEntityById(buf.readInt()) as LivingEntity
-        val level = entity.getLevel()
+        var level = 0
+        val entity = player.world.getEntityById(buf.readInt())
+        if (entity != null) level = (entity as LivingEntity).getLevel()
         (player as IEntityDataSaver).getPersistentData().putInt("entityLevel", level)
     }
 }

@@ -13,7 +13,9 @@
     "ServerWorldMixin"
   ],
   "client": [
-    "HudPlayerMixin"
+    "HandledScreenMixin",
+    "HudPlayerMixin",
+    "InventoryScreenMixin"
   ],
   "server": [
   ]
