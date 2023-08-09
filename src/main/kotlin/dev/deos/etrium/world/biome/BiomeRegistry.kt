@@ -10,7 +10,10 @@ import net.minecraft.sound.BiomeAdditionsSound
 import net.minecraft.sound.SoundEvents
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.ColorHelper
-import net.minecraft.world.biome.*
+import net.minecraft.world.biome.Biome
+import net.minecraft.world.biome.BiomeEffects
+import net.minecraft.world.biome.GenerationSettings
+import net.minecraft.world.biome.SpawnSettings
 
 object BiomeRegistry {
 
@@ -19,7 +22,9 @@ object BiomeRegistry {
 
     fun bootstrap(biomeRegisterable: Registerable<Biome>) {
         biomeRegisterable.apply {
-            register(ModBiomes.DEAD_FOREST.key(), ModBiomes.DEAD_FOREST.biome)
+            ModBiomes.values().forEach {
+                register(it.key(), it.biome)
+            }
         }
     }
 
@@ -47,7 +52,7 @@ object BiomeRegistry {
                 .fogColor(black)
                 .grassColor(white)
                 .foliageColor(white)
-                .additionsSound(BiomeAdditionsSound(SoundEvents.AMBIENT_CAVE, 1.0))
+                .additionsSound(BiomeAdditionsSound(SoundEvents.AMBIENT_CAVE, 20.0))
                 .skyColor(white)
                 .waterColor(white)
                 .waterFogColor(white)

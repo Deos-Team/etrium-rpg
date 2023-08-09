@@ -21,11 +21,18 @@ object ModSyncDataS2CPacket {
         (client.player as IEntityDataSaver).getPersistentData().putFloat("maxEnergy", buf.readFloat())
     }
 
-    fun levelRecieve(
+    fun levelReceive(
         client: MinecraftClient, handler: ClientPlayNetworkHandler,
         buf: PacketByteBuf, responseSender: PacketSender
     ) {
         (client.player as IEntityDataSaver).getPersistentData().putInt("level", buf.readInt())
+    }
+
+    fun levelEntityRecieve(
+        client: MinecraftClient, handler: ClientPlayNetworkHandler,
+        buf: PacketByteBuf, responseSender: PacketSender
+    ) {
+        (client.player as IEntityDataSaver).getPersistentData().putInt("entityLevel", buf.readInt())
     }
 
 }

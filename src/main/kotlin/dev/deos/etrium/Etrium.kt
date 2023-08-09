@@ -1,22 +1,26 @@
 package dev.deos.etrium
 
 import com.mojang.logging.LogUtils
+import dev.deos.etrium.command.BiomeEditorCommand
+import dev.deos.etrium.command.EnergyCommand
 import dev.deos.etrium.config.ConfigManager
 import dev.deos.etrium.event.*
 import dev.deos.etrium.network.DataPackets
+import dev.deos.etrium.registry.ItemGroupsRegistry
+import dev.deos.etrium.registry.ItemRegistry
 import dev.deos.etrium.utils.*
-import dev.deos.etrium.utils.EtriumData.getEnergy
-import dev.deos.etrium.utils.EtriumData.getMaxEnergy
-import dev.deos.etrium.utils.EtriumData.getRegen
 import dev.deos.etrium.utils.EnergyTypes.ENERGY
 import dev.deos.etrium.utils.EnergyTypes.LEVEL
 import dev.deos.etrium.utils.EnergyTypes.MAX_ENERGY
 import dev.deos.etrium.utils.EnergyTypes.REGEN
 import dev.deos.etrium.utils.EnergyTypes.XP
+import dev.deos.etrium.utils.EtriumData.getEnergy
+import dev.deos.etrium.utils.EtriumData.getLevel
+import dev.deos.etrium.utils.EtriumData.getMaxEnergy
+import dev.deos.etrium.utils.EtriumData.getRegen
+import dev.deos.etrium.world.biome.BiomeRegistry
+import dev.deos.etrium.world.biome.BiomeRegistry.key
 import net.fabricmc.api.ModInitializer
-import net.fabricmc.fabric.api.entity.event.v1.ServerEntityCombatEvents
-import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents
@@ -27,29 +31,16 @@ import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.Entity
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.damage.DamageSource
-import net.minecraft.entity.damage.DamageSources
-import net.minecraft.entity.damage.DamageType
-import net.minecraft.entity.damage.DamageTypes
-import net.minecraft.entity.data.DataTracker
-import net.minecraft.entity.data.TrackedDataHandlerRegistry
-import net.minecraft.entity.mob.MobEntity
-import net.minecraft.entity.passive.CowEntity
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.registry.Registries
-import net.minecraft.registry.RegistryKey
-import net.minecraft.registry.ServerDynamicRegistryType
-import net.minecraft.registry.entry.RegistryEntry
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
 import net.minecraft.util.math.BlockPos
-import net.minecraft.world.EntityList
 import net.minecraft.world.GameRules
 import net.minecraft.world.World
 import org.slf4j.Logger
-import java.util.*
 import kotlin.random.Random
 
 object Etrium : ModInitializer {
@@ -57,7 +48,7 @@ object Etrium : ModInitializer {
     val logger: Logger = LogUtils.getLogger()
 
     override fun onInitialize() {
-        Init
+        onInit()
         PlayerTickEvent.TICK.register(::onPlayerTick)
         PlayerJoinEvent.JOIN.register(::onPlayerFirstJoin)
         ServerLifecycleEvents.SERVER_STARTED.register(::onServerStart)
@@ -79,6 +70,7 @@ object Etrium : ModInitializer {
             .putFloat(REGEN, ConfigManager.readCfg().default.regen)
         if (!nbt.getPersistentData().contains(LEVEL)) nbt.getPersistentData().putInt(LEVEL, 1)
         if (!nbt.getPersistentData().contains(XP)) nbt.getPersistentData().putInt(XP, 0)
+        if (!nbt.getPersistentData().contains("entityLevel")) nbt.getPersistentData().putInt("entityLevel", 0)
     }
 
     private fun beforeDeath(entity: LivingEntity, damageSource: DamageSource, damage: Float): Boolean {
@@ -127,13 +119,22 @@ object Etrium : ModInitializer {
 
     private fun onSpawnEntity(entity: LivingEntity) {
         val nbt = (entity as IEntityDataSaver).getPersistentData()
+        val world = entity.world
+        val blockPos = entity.blockPos
+        val biome = world.getBiome(blockPos)
         var level = Random.nextInt(1, 12)
         val name = entity.name.string.lowercase()
         if (LevelAmount.entityLevels.contains(name)) {
             level = LevelAmount.entityLevels[name]!!.random()
         }
+        // DONT FORGOT
         nbt.putInt(LEVEL, level)
-        entity.customName = Text.literal("Lvl: $level").formatted(Formatting.BOLD, Formatting.GREEN)
+        when (biome.key.get()) {
+            BiomeRegistry.ModBiomes.DEAD_FOREST.key() -> {
+//                nbt.putInt(LEVEL, level)
+                entity.customName = Text.literal("Lvl: $level").formatted(Formatting.BOLD, Formatting.GREEN)
+            }
+        }
     }
 
     private fun onBlockBreaking(
@@ -161,6 +162,7 @@ object Etrium : ModInitializer {
             val entityNbt = (entity as IEntityDataSaver).getPersistentData()
             val playerNbt = (playerEntity as IEntityDataSaver).getPersistentData()
             val level = entityNbt.getInt(LEVEL)
+            if (level == 0) return
             val playerLevel = playerNbt.getInt(LEVEL)
             if (playerLevel > level) playerEntity.sendMessage(Text.literal("You didn't got any XP. Entity level's $level"))
             if (playerLevel == level) {
@@ -181,6 +183,10 @@ object Etrium : ModInitializer {
         if (tick % 4 == 0) {
             syncEnergy(player.getEnergy(), player)
             syncMaxEnergy(player.getMaxEnergy(), player)
+            syncLevel(player.getLevel(), player)
+            val nbt = (player as IEntityDataSaver).getPersistentData()
+            val entityLevel = nbt.getInt("entityLevel")
+            syncEntityLevel(entityLevel, player)
         }
         if (tick % 20 != 0) return
         if (player.getEnergy() >= player.getMaxEnergy()) return
@@ -198,16 +204,31 @@ object Etrium : ModInitializer {
         ServerPlayNetworking.send(player, DataPackets.ENERGY_ID, buf)
     }
 
+    private fun syncLevel(level: Int, player: ServerPlayerEntity) {
+        val buf = PacketByteBufs.create()
+        buf.writeInt(level)
+        ServerPlayNetworking.send(player, DataPackets.LEVEL_ID, buf)
+    }
+
     private fun syncMaxEnergy(energy: Float, player: ServerPlayerEntity) {
         val buf = PacketByteBufs.create()
         buf.writeFloat(energy)
         ServerPlayNetworking.send(player, DataPackets.MAX_ENERGY_ID, buf)
     }
 
-    private fun syncLevel(level: Int, player: ServerPlayerEntity) {
+    private fun syncEntityLevel(level: Int, player: ServerPlayerEntity) {
         val buf = PacketByteBufs.create()
         buf.writeInt(level)
-        ServerPlayNetworking.send(player, DataPackets.LEVEL_ID, buf)
+        ServerPlayNetworking.send(player, DataPackets.SERVER_ENTITY_ID, buf)
+    }
+
+    private fun onInit() {
+        DataPackets.registerC2SPackets()
+        ConfigManager
+        ItemRegistry
+        ItemGroupsRegistry
+        EnergyCommand
+        BiomeEditorCommand
     }
 
 }
